@@ -1,4 +1,6 @@
-from user_input import user_input
+from user_input import InputOptions
+
+teste = InputOptions()
+teste.user_input()
 
 
-user_input(cnpj=())

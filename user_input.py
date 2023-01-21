@@ -1,5 +1,5 @@
 from req_api import get_cnpj
-from db import Processes
+from db import collection
 
 
 class InputOptions:
@@ -10,7 +10,7 @@ class InputOptions:
             try:
                 data = get_cnpj(cnpj)
                 print(f"Dados obtidos com sucesso para o CNPJ {cnpj}!")
-                Processes.insert_one(data)
+                collection.insert_one(data)
                 print(f"Dados inseridos no banco de dados para o CNPJ {cnpj}.")
             except Exception as e:
                 print(f"Erro ao obter dados para o CNPJ {cnpj}: {e}")

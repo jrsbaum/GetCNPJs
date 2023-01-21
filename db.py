@@ -1,8 +1,8 @@
 from pymongo import MongoClient
-from cfg import mongo_client_key
+import cfg
 
 
-client = MongoClient(mongo_client_key)
-db = client.BigDataCorpProcesses
-Processes = db.Processes
+client = MongoClient(cfg.mongo_client_key)
+db = client[cfg.database_name]
+collection = db[cfg.collection_name]
 

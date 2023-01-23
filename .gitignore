@@ -1,6 +1,9 @@
 # cfg #
 cfg.py
 
+# logs #
+logs
+
 # pycache #
 __pycache__
 

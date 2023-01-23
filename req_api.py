@@ -1,8 +1,6 @@
-import datetime
-import os
-
 import requests
 import cfg
+from db import collection
 
 
 def get_cnpj(cnpj):
@@ -19,23 +17,23 @@ def get_cnpj(cnpj):
     }
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 200:
-        get_log_if_error(cnpj, response)
         raise Exception("Error while fetching data")
     return response.json()
 
 
 def get_next_page(data, cnpj):
-    teste = data['Result'][0]['Lawsuits']
-    if 'NextPageId' not in teste:
-        return print("nao ha nextpageid")
-    next_page_id = teste['NextPageId']
+    lawsuits = data['Result'][0]['Lawsuits']
+    if 'NextPageId' not in lawsuits:
+        return print("no next page id")
+    next_page_id = lawsuits['NextPageId']
     print(f"NextPageId: {next_page_id}")
     url = cfg.url
     payload = {
-        "Datasets": f"processes.next({next_page_id})",
+        "Datasets": f"{cfg.datasets_next}({next_page_id})",
         "q": f"doc{{{cnpj}}}",
         "Limit": 1
     }
+
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
@@ -43,25 +41,10 @@ def get_next_page(data, cnpj):
     }
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 200:
-        get_log_if_error(cnpj, response)
         raise Exception("Error while fetching data")
-    # chamada recursiva
+
+    query_id = data['QueryId']
+    filters = {"QueryId": f"{query_id}"}
+    newvalues = {"$set": {f'Continue': f"{lawsuits}"}}
+    collection.update_one(filters, newvalues)
     get_next_page(response.json(), cnpj)
-
-
-def get_log_if_error(cnpj, response):
-    # abrindo o arquivo para escrita
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-    file_name = f"log{cnpj} {current_time}.txt"
-
-    # Cria a pasta logs caso nao exista
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
-
-    # Salva o arquivo na pasta logs
-    with open(f"logs/{file_name}", "w") as f:
-        f.write(response.text)
-
-
-
-

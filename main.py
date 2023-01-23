@@ -1,7 +1,7 @@
-from user_input import InputOptions
+from user_input import CNPJInputValidation
 
 
-teste = InputOptions()
+teste = CNPJInputValidation()
 teste.user_input()
 
 

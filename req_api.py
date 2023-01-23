@@ -1,9 +1,11 @@
+from datetime import datetime
+
+import os
 import requests
 import cfg
-from db import collection
 
 
-def get_cnpj(cnpj):
+def get_cnpj_api_1(cnpj):
     url = cfg.url
     payload = {
         "Datasets": cfg.datasets,
@@ -13,38 +15,46 @@ def get_cnpj(cnpj):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "AccessToken": cfg.access_token
+        "AccessToken": cfg.access_token1
     }
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 200:
         raise Exception("Error while fetching data")
+    print("passou")
     return response.json()
 
 
-def get_next_page(data, cnpj):
-    lawsuits = data['Result'][0]['Lawsuits']
-    if 'NextPageId' not in lawsuits:
-        return print("no next page id")
-    next_page_id = lawsuits['NextPageId']
-    print(f"NextPageId: {next_page_id}")
+def get_cnpj_api_2(cnpj):
     url = cfg.url
     payload = {
-        "Datasets": f"{cfg.datasets_next}({next_page_id})",
+        "Datasets": cfg.datasets,
         "q": f"doc{{{cnpj}}}",
         "Limit": 1
     }
-
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "AccessToken": cfg.access_token
+        "AccessToken": cfg.access_token2
     }
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 200:
-        raise Exception("Error while fetching data")
+        GetError.get_log_if_error(cnpj, Exception)
+        raise Exception("Erro ao buscar dados")
+    print(f"Dados obtidos com sucesso para o CNPJ {cnpj}!")
+    return response.json()
 
-    query_id = data['QueryId']
-    filters = {"QueryId": f"{query_id}"}
-    newvalues = {"$set": {f'Continue': f"{lawsuits}"}}
-    collection.update_one(filters, newvalues)
-    get_next_page(response.json(), cnpj)
+
+class GetError:
+    @staticmethod
+    def get_log_if_error(cnpj, e):
+        # abrindo o arquivo para escrita
+        current_time = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+        file_name = f"log{cnpj} {current_time}.txt"
+
+        # Cria a pasta logs caso nao exista
+        if not os.path.exists("logs"):
+            os.makedirs("logs")
+
+        # Salva o arquivo na pasta logs
+        with open(f"logs/{file_name}", "w") as f:
+            f.write(e)

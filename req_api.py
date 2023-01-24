@@ -26,19 +26,20 @@ class CNPJCollector:
         return response.json()
 
     @staticmethod
-    def get_cnpj_api_2(cnpj):
+    def get_cnpj_token():
         url = cfg.url2
         payload = {"application": cfg.application_id, "application_secret": cfg.application_id_secret}
-
         headers = {
             'Content-Type': 'application/json'
         }
-
         response = requests.post(url, json=payload, headers=headers)
         print(f"token?: {response.text}")
         data = response.json()
         token = data["token"]
-        # Request
+        return token
+
+    @staticmethod
+    def get_cnpj_api_2(cnpj, token):
         url = f"{cfg.url_req}/{cnpj}"
         headers = {
             'Authorization': f'Bearer {token}'

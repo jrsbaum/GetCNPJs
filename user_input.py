@@ -23,7 +23,8 @@ class CNPJInputValidation:
                 cnpjs = cnpjs.split(",")
                 for cnpj in cnpjs:
                     try:
-                        data = CNPJCollector.get_cnpj_api_2(cnpj)
+                        token = CNPJCollector.get_cnpj_token()
+                        data = CNPJCollector.get_cnpj_api_2(cnpj, token)
                         print(f"Dados obtidos com sucesso para o CNPJ {cnpj}!")
                         collection2.insert_one(data)
                         print(f"Dados inseridos no banco de dados para o CNPJ {cnpj}.")

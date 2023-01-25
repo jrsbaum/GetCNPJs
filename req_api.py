@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import os
 import requests
 import cfg
@@ -33,22 +32,59 @@ class CNPJCollector:
             'Content-Type': 'application/json'
         }
         response = requests.post(url, json=payload, headers=headers)
-        print(f"token?: {response.text}")
+        print(f"token recebido")
         data = response.json()
         token = data["token"]
         return token
 
     @staticmethod
     def get_cnpj_api_2(cnpj, token):
-        url = f"{cfg.url_req}/{cnpj}"
+        url = f"{cfg.url_req}"
         headers = {
             'Authorization': f'Bearer {token}'
         }
-        response = requests.post(url, headers=headers)
+        body = {
+                "filter": "avancado",
+                "domain": "processos-judiciais",
+
+                "inputs": {
+                    "cnpj": f"{cnpj}",
+                    "razaoSocial": ""
+                },
+
+                "fields": [
+                    "processo",
+
+                    "passivos.cnpj",
+                    "passivos.cpf",
+                    "passivos.nome",
+
+                    "ativos.nome",
+                    "ativos.cpf",
+                    "ativos.cnpj",
+
+                    "outrasPartes.nome",
+                    "outrasPartes.cpf",
+                    "outrasPartes.cnpj",
+
+                    "ramoDireito",
+                    "segmento",
+                    "classe",
+
+                    "valorCausa.valor",
+                    "tribunal",
+
+                    "statusObservacao"
+
+                ],
+
+                "size": 1000,
+                "from": 0
+            }
+        response = requests.post(url, headers=headers, json=body)
         data = response.json()
-        if response.status_code != 200:
+        if response.status_code != 200 and response.status_code != 201:
             raise Exception("Erro ao buscar dados")
-        print(f"Dados obtidos com sucesso para o CNPJ {cnpj}!")
         return data
 
 
